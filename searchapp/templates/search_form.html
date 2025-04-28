@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #e6f0ff; /* Цвет фона */
+        }
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .header-row, .data-row, .abdr-cb-row {
+            display: grid;
+            grid-template-columns: 300px 80px 80px 30px 80px 80px; /* Сетка для всех строк */
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .data-row input[type="number"], .data-row select, .abdr-cb-row input[type="number"], .patient-row input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+        }
+        .header-row div,
+        .data-row div,
+        .abdr-cb-row div,
+        .patient-row div {
+            font-weight: bold;
+            text-align: left;
+            color: #0000ff; /* Синий цвет для названий полей */
+        }
+        .abdr-cb-row input[type="number"] {
+            width: 65px; /* Поля уменьшены до 65px */
+            padding: 5px;
+            text-align: center;
+            border: 2px solid red;
+            font-size: 14px;
+        }
+        label {
+            font-weight: bold;
+            color: #0000ff; /* Синий цвет для названий */
+        }
+                .modal {
+            display: none; /* Скрыто по умолчанию */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Полупрозрачный фон */
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+        .modal-list {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        .modal-list li {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+        }
+        .modal-list li:hover {
+            background-color: #f0f8ff;
+        }
+        .search-input {
+            width: 97.8%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .patient-row {
+            display: grid;
+            grid-template-columns: 300px 80px 80px 30px 80px 80px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .patient-row input[type="text"] {
+            flex: 1;
+            padding: 0 8px; /* Внутренний отступ */
+            font-size: 14px;
+            border: 1px solid #a0a0a0;
+            background-color: #e6f0ff;
+            border-right: none; /* Убираем правую границу поля */
+            border-radius: 4px 0 0 4px; /* Закругления только для левого края */
+            height: 32px; /* Установлена одинаковая высота */
+            box-sizing: border-box; /* Учитываем padding в высоту */
+        }
+        .patient-row button {
+            width: 50px;
+            height: 32px; /* Установлена одинаковая высота */
+            border: 1px solid #a0a0a0;
+            border-left: none; /* Убираем левую границу кнопки */
+            background-color: #e6f0ff;
+            border-radius: 0 4px 4px 0; /* Закругления только для правого края */
+            cursor: pointer;
+            box-sizing: border-box; /* Учитываем padding в высоту */
+        }
+        .patient-row button:focus,
+        .patient-row input[type="text"]:focus {
+            outline: none; /* Убираем обводку при фокусе */
+        }
+        .patient-row button:hover {
+            background-color: #d9e6f2; /* Цвет кнопки при наведении */
+        }
+        .search-engine-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-engine-container label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #0000ff;
+        }
+        .search-engine-container .checkbox-options {
+            display: flex;
+            gap: 20px; /* Расстояние между опциями */
+        }
+        .search-engine-container input[type="checkbox"] {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+       <h1>Register Patient</h1>
+	<form id="registerForm" method="POST">
+    		{% csrf_token %}
+    		<div class="patient-row">
+       			<div>Patient:</div>
+        		<div class="patient-row">
+            			<input type="text" id="patientInput" name="patient_name" placeholder="Search by ID...">
+            			<button type="button" id="openSearch">...</button>
+        		</div>
+    		</div>
+    		<button type="submit" id="registerButton">Register</button>
+	</form>
+
+
+        <h1>Search Request</h1>
+        <form method="POST" action="{}">
+            <!-- Чекбокс Search Engine -->
+            <div class="search-engine-container">
+                <label>Search Engine:</label>
+                <div class="checkbox-options">
+                    <label>
+                        <input type="checkbox" name="search_engine[]" value="hap-e">
+                        HAP-E search (by DKMS)
+                    </label>
+                    <label>
+                        <input type="checkbox" name="search_engine[]" value="atlas">
+                        Atlas (by Anthony Nolan)
+                    </label>
+                </div>
+            </div>
+            <!-- Строка с Maximum number of donors -->
+            <div class="abdr-cb-row">
+                <div>Maximum number of donors:</div>
+                <div>ABDR:</div>
+                <input type="number" name="max_donors_abdr" value="0"> <!-- Поле уменьшено до 65px -->
+                <div></div> <!-- Пропуск -->
+                <div>CB:</div>
+                <input type="number" name="max_donors_cb" value="0"> <!-- Поле уменьшено до 65px -->
+            </div>
+
+            <!-- Заголовки для таблицы -->
+            <div class="header-row">
+                <div></div> <!-- Названия -->
+                <div>total</div>
+                <div>antigen</div>
+                <div></div> <!-- Отступ -->
+                <div>total_2</div>
+                <div>antigen_2</div>
+            </div>
+
+            <!-- Полные строки -->
+            <div class="data-row">
+                <div>Maximum ABCDRDQ mismatches:</div>
+                <select name="max_abcrdq_total">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                    <option value="2">2 MM</option>
+                </select>
+                <select name="max_abcrdq_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_abcrdq_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_abcrdq_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum ABDR mismatches:</div>
+                <select name="max_abdr_total">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                    <option value="2">2 MM</option>
+                </select>
+                <select name="max_abdr_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_abdr_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_abdr_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches A:</div>
+                <select name="max_a_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_a_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_a_total_2">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_a_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches B:</div>
+                <select name="max_b_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_b_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_b_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_b_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches C:</div>
+                <select name="max_c_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_c_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_c_total_2">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_c_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches DR:</div>
+                <select name="max_dr_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_dr_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_dr_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_dr_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches DQ:</div>
+                <select name="max_dq_total">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_dq_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_dq_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_dq_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>C(w) values required:</div>
+                <select name="cw_values_total">
+                    <option value="no">no</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="cw_values_total_2">
+                    <option value="no">no</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>DQ(B1) values required:</div>
+                <select name="dqb1_values_total">
+                    <option value="no">no</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="dqb1_values_total_2">
+                    <option value="no">no</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>DPB1 values required:</div>
+                <select name="dpb1_values_total">
+                    <option value="no">no</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="dpb1_values_total_2">
+                    <option value="no">no</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Gender filter:</div>
+                <select name="gender_filter_total">
+                    <option value="?">?</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="gender_filter_total_2">
+                    <option value="?">?</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>CMV status filter:</div>
+                <select name="cmv_status_total">
+                    <option value="?">?</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="cmv_status_total_2">
+                    <option value="?">?</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Extended primary sorting:</div>
+                <select name="extended_sorting_total">
+                    <option value="Remote">Remote</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="extended_sorting_total_2">
+                    <option value="Remote">Remote</option>
+                </select>
+            </div>
+
+            <button type="Start search">Submit</button>
+        </form>
+    </div>
+    <!-- Модальное окно для списка ID -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Select Patient ID</h2>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search for Patient ID...">
+        <ul class="modal-list" id="patientList">
+            <!-- Список будет загружен динамически -->
+        </ul>
+    </div>
+</div>
+
+    <script>
+        // Открытие модального окна
+        document.getElementById('openSearch').onclick = function () {
+            document.getElementById('searchModal').style.display = 'block';
+        };
+
+        // Закрытие модального окна
+        document.getElementById('closeModal').onclick = function () {
+            document.getElementById('searchModal').style.display = 'none';
+        };
+
+        // Выбор ID пациента из списка
+        function selectPatient(id) {
+            const inputField = document.getElementById('patientInput');
+            inputField.value = id; // Установить выбранный ID
+            document.getElementById('searchModal').style.display = 'none'; // Закрыть окно
+        }
+
+        // Фильтрация списка ID
+        document.getElementById('searchInput').oninput = function () {
+            const filter = this.value.toLowerCase();
+            const listItems = document.querySelectorAll('#patientList li');
+            listItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? '' : 'none';
+            });
+        };
+
+        // Закрытие окна при клике вне модального контента
+        window.onclick = function (event) {
+            if (event.target == document.getElementById('searchModal')) {
+                document.getElementById('searchModal').style.display = 'none';
+            }
+        };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const modalList = document.getElementById("patientList");
+        const searchInput = document.getElementById("searchInput");
+
+        // Функция для получения данных с сервера
+        async function fetchPatients() {
+            try {
+                const response = await fetch('/searchapp/api/patients/');
+                if (!response.ok) {
+                    throw new Error('Не удалось загрузить список пациентов');
+                }
+                const data = await response.json();
+                populatePatientList(data.patients);
+            } catch (error) {
+                console.error('Ошибка при загрузке пациентов:', error);
+            }
+        }
+
+        // Функция для заполнения списка пациентов
+        function populatePatientList(patients) {
+            modalList.innerHTML = ""; // Очищаем список
+            patients.forEach(patient => {
+                const li = document.createElement("li");
+                li.textContent = `${patient.patient_id} - ${patient.wmda_id}`;
+                li.setAttribute("onclick", `selectPatient('${patient.patient_id}')`);
+                modalList.appendChild(li);
+            });
+        }
+
+        // Фильтрация списка пациентов
+        searchInput.addEventListener("input", function () {
+            const filter = searchInput.value.toLowerCase();
+            const items = modalList.getElementsByTagName("li");
+            Array.from(items).forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? "" : "none";
+            });
+        });
+
+        // Загружаем список пациентов при загрузке страницы
+        fetchPatients();
+    });
+
+    // Функция для выбора пациента
+    function selectPatient(patientId) {
+    const inputField = document.getElementById('patientInput');
+    inputField.value = patientId; // Установить выбранный ID в поле ввода
+    document.getElementById('searchModal').style.display = 'none'; // Закрыть модальное окно
+}
+// Функция для получения CSRF-токена из cookies
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Проверьте, начинается ли cookie с "csrftoken="
+            if (cookie.substring(0, 10) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.getElementById('registerForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const patientId = document.getElementById('patientInput').value;
+    const csrfToken = getCSRFToken(); // Получаем CSRF-токен
+
+    if (!patientId) {
+        alert('Please select a patient ID.');
+        return;
+    }
+
+    try {
+        // Шаг 1: Проверяем WMDAID для выбранного пациента
+        const checkResponse = await fetch('/searchapp/api/check_patient/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken, // Передаем CSRF-токен в заголовке
+            },
+            body: JSON.stringify({ patient_id: patientId }),
+        });
+
+        const checkData = await checkResponse.json();
+
+        if (checkData.wmda_id !== 0) {
+            alert('The WMDAID for this patient already exists.');
+            return;
+        }
+
+        // Шаг 2: Отправляем данные на внешний API
+        const registerResponse = await fetch('/searchapp/api/register_patient/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken, // Передаем CSRF-токен в заголовке
+            },
+            body: JSON.stringify({ patient_id: patientId }),
+        });
+
+        const registerData = await registerResponse.json();
+
+        if (registerData.success) {
+            alert('Patient registered successfully!');
+        } else {
+            alert('Failed to register the patient.');
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+
+
+    </script>
+
+</body>
+</html>

@@ -158,34 +158,28 @@
         .patient-row button:hover {
             background-color: #d9e6f2; /* Цвет кнопки при наведении */
         }
-    .search-engine-container {
-        display: grid;
-        grid-template-columns: 180px 1fr; /* Первая колонка для названий, вторая для опций */
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .search-engine-container label {
-        font-weight: bold;
-        color: #0000ff; /* Синий цвет для названий */
-        text-align: left; /* Текст выровнен по левому краю */
-    }
-
-    .search-engine-container .checkbox-options {
-        display: flex;
-        gap: 20px; /* Расстояние между опциями */
-    }
-
-    .search-engine-container input[type="checkbox"], 
-    .search-engine-container select {
-        margin-right: 5px;
-    }
-
+        .search-engine-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-engine-container label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #0000ff;
+        }
+        .search-engine-container .checkbox-options {
+            display: flex;
+            gap: 20px; /* Расстояние между опциями */
+        }
+        .search-engine-container input[type="checkbox"] {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="form-container">
-       <h1>Select Patient</h1>
+       <h1>Register Patient</h1>
 	<form id="registerForm" method="POST">
     		{% csrf_token %}
 		<div class="patient-row">
@@ -196,15 +190,6 @@
         			<button type="button" id="openSearch">...</button>
     			</div>
 		</div>
-        	<!-- Новая строка для WMDAID -->
-        	<div class="patient-row">
-            		<div>WMDAID:</div>
-            		<div class="patient-row">
-                	<!-- Поле для отображения WMDAID -->
-                	<input type="text" id="wmdaIdInput" name="wmda_id" placeholder="WMDAID" readonly>
-                        <button type="button"></button>
-            		</div>
-        	</div>
     		<button type="submit" id="registerButton">Register</button>
 	</form>
 
@@ -225,80 +210,215 @@
                     </label>
                 </div>
             </div>
-            <!-- Строка с Search Type -->
-		<div class="search-engine-container">
-    			<label>Search Type:</label>
-    			<div class="checkbox-options">
-        			<label>
-            				<input type="checkbox" name="search_type[]" value="ABDR">
-            				ABDR
-        			</label>
-        			<label>
-            				<input type="checkbox" name="search_type[]" value="CB">
-            				CB
-        			</label>
-    			</div>
-		</div>
-        <!-- Новая строка Search Mismatches -->
-        <div class="search-engine-container">
-            <label>Search Mismatches:</label>
-            <div class="checkbox-options">
-                <label>
-                    ABDR:
-                    <select name="mismatches_abdr">
-                        <option value="none">none</option>
-                        <option value="1">1 MM</option>
-                        <option value="2">2 MM</option>
-                        <option value="3">3 MM</option>
-                        <option value="4">4 MM</option>
-                        <option value="5">5 MM</option>
-                        <option value="6">6 MM</option>
-                        <option value="7">7 MM</option>
-                        <option value="8">8 MM</option>
-                    </select>
-                </label>
-                <label>
-                    CB:
-                    <select name="mismatches_cb">
-                        <option value="none">none</option>
-                        <option value="1">1 MM</option>
-                        <option value="2">2 MM</option>
-                        <option value="3">3 MM</option>
-                        <option value="4">4 MM</option>
-                        <option value="5">5 MM</option>
-                        <option value="6">6 MM</option>
-                        <option value="7">7 MM</option>
-                        <option value="8">8 MM</option>
-                    </select>
-                </label>
+            <!-- Строка с Maximum number of donors -->
+            <div class="abdr-cb-row">
+                <div>Maximum number of donors:</div>
+                <div>ABDR:</div>
+                <input type="number" name="max_donors_abdr" value="0"> <!-- Поле уменьшено до 65px -->
+                <div></div> <!-- Пропуск -->
+                <div>CB:</div>
+                <input type="number" name="max_donors_cb" value="0"> <!-- Поле уменьшено до 65px -->
             </div>
-        </div>
-        <!-- Новая строка To Be Considered -->
-        <div class="search-engine-container">
-            <label>To Be Considered:</label>
-            <div class="checkbox-options">
-                <label>
-                    <input type="checkbox" name="to_be_considered[]" value="A">
-                    A
-                </label>
-                <label>
-                    <input type="checkbox" name="to_be_considered[]" value="B">
-                    B
-                </label>
-                <label>
-                    <input type="checkbox" name="to_be_considered[]" value="C">
-                    C
-                </label>
-                <label>
-                    <input type="checkbox" name="to_be_considered[]" value="DRB1">
-                    DRB1
-                </label>
-                <label>
-                    <input type="checkbox" name="to_be_considered[]" value="DQB1">
-                    DQB1
-                </label>
+
+            <!-- Заголовки для таблицы -->
+            <div class="header-row">
+                <div></div> <!-- Названия -->
+                <div>total</div>
+                <div>antigen</div>
+                <div></div> <!-- Отступ -->
+                <div>total_2</div>
+                <div>antigen_2</div>
             </div>
-        </div>            
+
+            <!-- Полные строки -->
+            <div class="data-row">
+                <div>Maximum ABCDRDQ mismatches:</div>
+                <select name="max_abcrdq_total">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                    <option value="2">2 MM</option>
+                </select>
+                <select name="max_abcrdq_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_abcrdq_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_abcrdq_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum ABDR mismatches:</div>
+                <select name="max_abdr_total">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                    <option value="2">2 MM</option>
+                </select>
+                <select name="max_abdr_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_abdr_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_abdr_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches A:</div>
+                <select name="max_a_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_a_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_a_total_2">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_a_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches B:</div>
+                <select name="max_b_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_b_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_b_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_b_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches C:</div>
+                <select name="max_c_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_c_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_c_total_2">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_c_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches DR:</div>
+                <select name="max_dr_total">
+                    <option value="none">none</option>
+                </select>
+                <select name="max_dr_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_dr_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_dr_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Maximum mismatches DQ:</div>
+                <select name="max_dq_total">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_dq_antigen">
+                    <option value="none">none</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <select name="max_dq_total_2">
+                    <option value="none">none</option>
+                    <option value="1">1 MM</option>
+                </select>
+                <select name="max_dq_antigen_2">
+                    <option value="none">none</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>C(w) values required:</div>
+                <select name="cw_values_total">
+                    <option value="no">no</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="cw_values_total_2">
+                    <option value="no">no</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>DQ(B1) values required:</div>
+                <select name="dqb1_values_total">
+                    <option value="no">no</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="dqb1_values_total_2">
+                    <option value="no">no</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>DPB1 values required:</div>
+                <select name="dpb1_values_total">
+                    <option value="no">no</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="dpb1_values_total_2">
+                    <option value="no">no</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Gender filter:</div>
+                <select name="gender_filter_total">
+                    <option value="?">?</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="gender_filter_total_2">
+                    <option value="?">?</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>CMV status filter:</div>
+                <select name="cmv_status_total">
+                    <option value="?">?</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="cmv_status_total_2">
+                    <option value="?">?</option>
+                </select>
+            </div>
+            <div class="data-row">
+                <div>Extended primary sorting:</div>
+                <select name="extended_sorting_total">
+                    <option value="Remote">Remote</option>
+                </select>
+                <div></div> <!-- Промежуток -->
+                <div></div>
+                <select name="extended_sorting_total_2">
+                    <option value="Remote">Remote</option>
+                </select>
+            </div>
 
             <button type="Start search">Submit</button>
         </form>
@@ -403,12 +523,11 @@
                 modalList.appendChild(li);
             });
         }
-           // Функция для выбора пациента
-           function selectPatient(patientId, wmdaId) {
-               patientInput.value = patientId; // Установить только PatientID
-               wmdaIdInput.value = wmdaId; // Установить WMDAID
-               document.getElementById('searchModal').style.display = 'none'; // Закрыть модальное окно
-           }
+        // Функция для выбора пациента
+        function selectPatient(patientId, wmdaId) {
+            patientInput.value = `PatientID: ${patientId}, WMDAID: ${wmdaId}`;
+            document.getElementById('searchModal').style.display = 'none'; // Закрыть модальное окно
+        }
         // Фильтрация списка пациентов
         searchInput.addEventListener("input", function () {
             const filter = searchInput.value.toLowerCase();

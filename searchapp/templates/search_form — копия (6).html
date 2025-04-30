@@ -158,29 +158,23 @@
         .patient-row button:hover {
             background-color: #d9e6f2; /* Цвет кнопки при наведении */
         }
-    .search-engine-container {
-        display: grid;
-        grid-template-columns: 180px 1fr; /* Первая колонка для названий, вторая для опций */
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .search-engine-container label {
-        font-weight: bold;
-        color: #0000ff; /* Синий цвет для названий */
-        text-align: left; /* Текст выровнен по левому краю */
-    }
-
-    .search-engine-container .checkbox-options {
-        display: flex;
-        gap: 20px; /* Расстояние между опциями */
-    }
-
-    .search-engine-container input[type="checkbox"], 
-    .search-engine-container select {
-        margin-right: 5px;
-    }
-
+        .search-engine-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-engine-container label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #0000ff;
+        }
+        .search-engine-container .checkbox-options {
+            display: flex;
+            gap: 20px; /* Расстояние между опциями */
+        }
+        .search-engine-container input[type="checkbox"] {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>

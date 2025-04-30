@@ -7,7 +7,7 @@ DATABASE_CONFIG = {
     'password': 'liku',  # Ваш пароль
     'host': '10.10.12.12',  # Адрес сервера базы данных
     'port': '3050',  # Порт Firebird
-    'database': 'C:\Steiner189DB\Database\DATABMDW.FDB',  # Путь к вашей базе данных
+    'database': 'C:\Prometheus_Api\DATABMDW.FDB',  # Путь к вашей базе данных
 }
 
 # Создаем строку подключения

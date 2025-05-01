@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Create Patient{% endblock %}
+
+{% block styles %}
+<style>
+    /* Адаптивный и аккуратный стиль для patient-row */
+    .patient-row {
+        align-items: center;
+        margin-bottom: 15px; /* Отступ между строками */
+    }
+
+    .patient-row div:first-child {
+        font-weight: bold;
+        color: #0000ff; /* Синий цвет для меток */
+        width: 150px; /* Фиксированная ширина для меток */
+        text-align: left;
+        margin-right: 10px; /* Отступ между меткой и полем ввода */
+    }
+
+    .patient-row input[type="text"], 
+    .patient-row input[type="date"] {
+        width: 250px; /* Умеренная фиксированная ширина для полей */
+        padding: 8px; /* Внутренний отступ */
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px; /* Размер шрифта */
+        background-color: #e6f0ff; /* Цвет фона */
+    }
+
+    /* Стиль кнопки */
+    .form-container button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .form-container button:hover {
+        background-color: #45a049;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Create Patient</h1>
+    <form id="createPatientForm" method="POST">
+        {% csrf_token %}
+        <!-- Поле для PatientID -->
+        <div class="patient-row">
+            <div>PatientID:</div>
+            <input type="text" name="patient_id" placeholder="Enter PatientID" required>
+        </div>
+        <!-- Поле для Patientnum -->
+        <div class="patient-row">
+            <div>Patientnum:</div>
+            <input type="text" name="patientnum" placeholder="Enter Patientnum" required>
+        </div>
+        <!-- Поле для Last Name -->
+        <div class="patient-row">
+            <div>Last Name:</div>
+            <input type="text" name="last_name" placeholder="Enter Last Name" required>
+        </div>
+        <!-- Поле для First Name -->
+        <div class="patient-row">
+            <div>First Name:</div>
+            <input type="text" name="first_name" placeholder="Enter First Name" required>
+        </div>
+        <!-- Поле для Date of Birth -->
+        <div class="patient-row">
+            <div>Date of Birth:</div>
+            <input type="date" name="date_of_birth" required>
+        </div>
+        <!-- Поле для DNA-A -->
+        <div class="patient-row">
+            <div>DNA-A:</div>
+            <input type="text" name="dna_a" placeholder="Enter DNA-A" required>
+        </div>
+        <!-- Поле для DNA-B -->
+        <div class="patient-row">
+            <div>DNA-B:</div>
+            <input type="text" name="dna_b" placeholder="Enter DNA-B" required>
+        </div>
+        <!-- Поле для DRB1 -->
+        <div class="patient-row">
+            <div>DRB1:</div>
+            <input type="text" name="drb1" placeholder="Enter DRB1" required>
+        </div>
+        <!-- Кнопка отправки формы -->
+        <button type="submit">Create Patient</button>
+    </form>
+</div>
+{% endblock %}

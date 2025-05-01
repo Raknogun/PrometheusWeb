@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Create Patient{% endblock %}
+
+{% block styles %}
+<style>
+    .patient-row {
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .patient-row div:first-child {
+        font-weight: bold;
+        color: #0000ff;
+        width: 150px;
+        text-align: left;
+        margin-right: 10px;
+    }
+
+    .patient-row input[type="text"], 
+    .patient-row input[type="date"] {
+        width: 250px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        background-color: #e6f0ff;
+    }
+
+    .form-container button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .form-container button:hover {
+        background-color: #45a049;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Create Patient</h1>
+    <form id="createPatientForm" method="POST">
+        {% csrf_token %}
+        <div class="patient-row">
+            <div>PatientID:</div>
+            <input type="text" name="patient_id" id="patient_id" placeholder="Enter PatientID" required>
+            <div class="error-message" id="error_patient_id">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>Patientnum:</div>
+            <input type="text" name="patientnum" id="patientnum" value="{{ patientnum }}" readonly>
+            <div class="error-message" id="error_patientnum">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>Last Name:</div>
+            <input type="text" name="last_name" id="last_name" placeholder="Enter Last Name" required>
+            <div class="error-message" id="error_last_name">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>First Name:</div>
+            <input type="text" name="first_name" id="first_name" placeholder="Enter First Name" required>
+            <div class="error-message" id="error_first_name">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>Date of Birth:</div>
+            <input type="date" name="date_of_birth" id="date_of_birth" required>
+            <div class="error-message" id="error_date_of_birth">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>DNA-A:</div>
+            <input type="text" name="dna_a" id="dna_a" placeholder="Enter DNA-A" required>
+            <div class="error-message" id="error_dna_a">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>DNA-B:</div>
+            <input type="text" name="dna_b" id="dna_b" placeholder="Enter DNA-B" required>
+            <div class="error-message" id="error_dna_b">This field is required.</div>
+        </div>
+        <div class="patient-row">
+            <div>DRB1:</div>
+            <input type="text" name="drb1" id="drb1" placeholder="Enter DRB1" required>
+            <div class="error-message" id="error_drb1">This field is required.</div>
+        </div>
+        <button type="submit">Create Patient</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('createPatientForm').addEventListener('submit', function(event) {
+        // Prevent form submission
+        event.preventDefault();
+
+        let isValid = true;
+
+        // List of fields to validate
+        const fields = [
+            { id: 'patient_id', errorId: 'error_patient_id' },
+            { id: 'patientnum', errorId: 'error_patientnum' },
+            { id: 'last_name', errorId: 'error_last_name' },
+            { id: 'first_name', errorId: 'error_first_name' },
+            { id: 'date_of_birth', errorId: 'error_date_of_birth' },
+            { id: 'dna_a', errorId: 'error_dna_a' },
+            { id: 'dna_b', errorId: 'error_dna_b' },
+            { id: 'drb1', errorId: 'error_drb1' }
+        ];
+
+        // Validate each field
+        fields.forEach(field => {
+            const inputElement = document.getElementById(field.id);
+            const errorElement = document.getElementById(field.errorId);
+
+            if (!inputElement.value.trim()) {
+                isValid = false;
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+
+        // If all fields are valid, submit the form
+        if (isValid) {
+            this.submit();
+        }
+    });
+</script>
+{% endblock %}

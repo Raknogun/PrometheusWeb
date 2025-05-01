@@ -152,3 +152,90 @@ def register_patient(request):
     except Exception as e:
         print(f"Необработанная ошибка в функции register_patient: {e}")
         return JsonResponse({"error": "Internal server error"}, status=500)
+
+@csrf_exempt
+def start_search(request):
+    """
+    Handles the "Start search" button functionality.
+    """
+    try:
+        # Extract data from the POST request
+        data = json.loads(request.body)
+        patient_id = data.get('patient_id')
+        search_engine = data.get('search_engine')  # hap-e or atlas
+        search_type = data.get('search_type')  # ABDR or CB
+
+        if not patient_id:
+            return JsonResponse({"error": "Patient ID is required."}, status=400)
+
+        session = Session()
+        try:
+            # Check if WMDAID is available for the patient
+            sql_query = text("SELECT PATIENTNUM, WMDAID_SM FROM BMDPAT1 WHERE PATIENTID = :patient_id")
+            patient = session.execute(sql_query, {"patient_id": patient_id}).fetchone()
+
+            if not patient:
+                return JsonResponse({"error": "Patient not found."}, status=404)
+
+            patientnum, wmda_id = patient
+            if not wmda_id or wmda_id == 0:
+                return JsonResponse({"error": "The selected patient is not registered and does not have a valid WMDAID."}, status=400)
+
+            # Prepare data for the external API
+            match_engine = 2 if search_engine == "hap-e" else 3
+            search_type_api = "DR" if search_type == "ABDR" else "CB"
+            payload = {
+                "wmdaId": wmda_id,
+                "matchEngine": match_engine,
+                "searchType": search_type_api,
+                "OverallMismatches": 0
+            }
+
+            # Send data to the external API
+            api_url = "https://example.com/api/search"  # Replace with the actual API URL
+            headers = {"Content-Type": "application/json"}
+            response = requests.post(api_url, json=payload, headers=headers)
+
+            if response.status_code != 200:
+                return JsonResponse({"error": "Failed to initiate search with external API."}, status=response.status_code)
+
+            # Extract searchId from the API response
+            search_id = response.json().get("searchId")
+            if not search_id:
+                return JsonResponse({"error": "Invalid response from external API."}, status=500)
+
+            # Insert the result into the Firebird database (BMDSRCID table)
+            insert_query = text("""
+                INSERT INTO BMDSRCID (SRCNUM, PATIENTNUM, SEARCHID, SRCENGINE, SRCTYPE, STATUS)
+                VALUES (
+                    (SELECT COALESCE(MAX(SRCNUM), 0) + 1 FROM BMDSRCID),
+                    :patientnum,
+                    :search_id,
+                    :srcengine,
+                    :srctype,
+                    0
+                )
+            """)
+            session.execute(insert_query, {
+                "patientnum": patientnum,
+                "search_id": search_id,
+                "srcengine": match_engine,
+                "srctype": search_type_api
+            })
+            session.commit()
+
+        finally:
+            session.close()
+
+        return JsonResponse({"success": True, "searchId": search_id}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def search_form(request):
+    return render(request, 'search_form.html')
+
+def patient_form(request):
+    return render(request, 'Patient_form.html')

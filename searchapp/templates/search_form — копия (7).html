@@ -4,16 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #e6f0ff; /* Цвет фона */
+        }
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .header-row, .data-row, .abdr-cb-row {
+            display: grid;
+            grid-template-columns: 300px 80px 80px 30px 80px 80px; /* Сетка для всех строк */
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .data-row input[type="number"], .data-row select, .abdr-cb-row input[type="number"], .patient-row input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+        }
+        .header-row div,
+        .data-row div,
+        .abdr-cb-row div,
+        .patient-row div {
+            font-weight: bold;
+            text-align: left;
+            color: #0000ff; /* Синий цвет для названий полей */
+        }
+        .abdr-cb-row input[type="number"] {
+            width: 65px; /* Поля уменьшены до 65px */
+            padding: 5px;
+            text-align: center;
+            border: 2px solid red;
+            font-size: 14px;
+        }
+        label {
+            font-weight: bold;
+            color: #0000ff; /* Синий цвет для названий */
+        }
+                .modal {
+            display: none; /* Скрыто по умолчанию */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Полупрозрачный фон */
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+    .modal-header-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Две колонки */
+        font-weight: bold;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-bottom: 2px solid #ccc;
+    }
+    .modal-list {
+        list-style: none;
+        padding: 0;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        margin-top: 0;
+    }
+    .modal-list li {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #ddd;
+    }
+    .modal-list li span {
+        padding: 5px 10px;
+        text-align: left;
+    }
+    .modal-list li:hover {
+        background-color: #f0f8ff;
+    }
+    .modal-list li span:first-child {
+        font-weight: bold;
+    }
+    #patientInput {
+        cursor: pointer;
+        background-color: #e6f0ff;
+    }
+        .search-input {
+            width: 97.8%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .patient-row {
+            display: grid;
+            grid-template-columns: 300px 80px 80px 30px 80px 80px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .patient-row input[type="text"] {
+            flex: 1;
+            padding: 0 8px; /* Внутренний отступ */
+            font-size: 14px;
+            border: 1px solid #a0a0a0;
+            background-color: #e6f0ff;
+            border-right: none; /* Убираем правую границу поля */
+            border-radius: 4px 0 0 4px; /* Закругления только для левого края */
+            height: 32px; /* Установлена одинаковая высота */
+            box-sizing: border-box; /* Учитываем padding в высоту */
+        }
+        .patient-row button {
+            width: 50px;
+            height: 32px; /* Установлена одинаковая высота */
+            border: 1px solid #a0a0a0;
+            border-left: none; /* Убираем левую границу кнопки */
+            background-color: #e6f0ff;
+            border-radius: 0 4px 4px 0; /* Закругления только для правого края */
+            cursor: pointer;
+            box-sizing: border-box; /* Учитываем padding в высоту */
+        }
+        .patient-row button:focus,
+        .patient-row input[type="text"]:focus {
+            outline: none; /* Убираем обводку при фокусе */
+        }
+        .patient-row button:hover {
+            background-color: #d9e6f2; /* Цвет кнопки при наведении */
+        }
+    .search-engine-container {
+        display: grid;
+        grid-template-columns: 180px 1fr; /* Первая колонка для названий, вторая для опций */
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .search-engine-container label {
+        font-weight: bold;
+        color: #0000ff; /* Синий цвет для названий */
+        text-align: left; /* Текст выровнен по левому краю */
+    }
+
+    .search-engine-container .checkbox-options {
+        display: flex;
+        gap: 20px; /* Расстояние между опциями */
+    }
+
+    .search-engine-container input[type="checkbox"], 
+    .search-engine-container select {
+        margin-right: 5px;
+    }
+
+    </style>
 </head>
 <body>
-{% extends "base.html" %}
-
-{% block title %}Search Request{% endblock %}
-
-{% block content %}
-
-
-
     <div class="form-container">
        <h1>Select Patient</h1>
 	<form id="registerForm" method="POST">
@@ -40,40 +210,38 @@
 
 
         <h1>Search Request</h1>
+        <form method="POST" action="{}">
+            <!-- Радиокнопки Search Engine -->
+            <div class="search-engine-container">
+                <label>Search Engine:</label>
+                <div class="checkbox-options">
+                    <label>
+                        <input type="radio" name="search_engine" value="hap-e" checked>
+                        HAP-E search (by DKMS)
+                    </label>
+                    <label>
+                        <input type="radio" name="search_engine" value="atlas">
+                        Atlas (by Anthony Nolan)
+                    </label>
+                </div>
+            </div>
+            <!-- Строка с Search Type -->
+		<div class="search-engine-container">
+    			<label>Search Type:</label>
+    			<div class="checkbox-options">
+        			<label>
+            				<input type="radio" name="search_type" value="ABDR" checked>
+            				ABDR
+        			</label>
+        			<label>
+            				<input type="radio" name="search_type" value="CB">
+            				CB
+        			</label>
+    			</div>
+		</div>     
 
-<form id="searchForm" method="POST">
-    {% csrf_token %}
-    <!-- Радиокнопки Search Engine -->
-    <div class="search-engine-container">
-        <label>Search Engine:</label>
-        <div class="checkbox-options">
-            <label>
-                <input type="radio" name="search_engine" value="hap-e" checked>
-                HAP-E search (by DKMS)
-            </label>
-            <label>
-                <input type="radio" name="search_engine" value="atlas">
-                Atlas (by Anthony Nolan)
-            </label>
-        </div>
-    </div>
-    <!-- Строка с Search Type -->
-    <div class="search-engine-container">
-        <label>Search Type:</label>
-        <div class="checkbox-options">
-            <label>
-                <input type="radio" name="search_type" value="ABDR" checked>
-                ABDR
-            </label>
-            <label>
-                <input type="radio" name="search_type" value="CB">
-                CB
-            </label>
-        </div>
-    </div>     
-
-    <button type="submit" id="searchButton">Start search</button>
-</form>
+            <button type="Start search">Start search</button>
+        </form>
     </div>
 <!-- Модальное окно для выбора пациента -->
 <div id="searchModal" class="modal">
@@ -94,6 +262,7 @@
         </ul>
     </div>
 </div>
+
     <script>
         // Открытие модального окна
         document.getElementById('openSearch').onclick = function () {
@@ -280,47 +449,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     }
 });
 
-    document.getElementById('searchButton').addEventListener('click', async function () {
-        const patientId = document.getElementById('patientInput').value;
-        const searchEngine = document.querySelector('input[name="search_engine"]:checked').value;
-        const searchType = document.querySelector('input[name="search_type"]:checked').value;
-
-        if (!patientId) {
-            alert("Please select a Patient ID.");
-            return;
-        }
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        try {
-            const response = await fetch('/searchapp/start_search/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    patient_id: patientId,
-                    search_engine: searchEngine,
-                    search_type: searchType
-                })
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                alert(`Search started successfully! Search ID: ${data.searchId}`);
-            } else {
-                alert(`Error: ${data.error}`);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        }
-    });
 
     </script>
 
 </body>
-
-{% endblock %}
 </html>
